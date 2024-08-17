@@ -4,29 +4,25 @@ summary: An ABS app
 description: Client for Audiobookshelf
 
 confinement: strict
-base: core22
+base: core24
 grade: stable
 
 slots:
-  dbus-audiobookshelfly:
+  dbus-abs_flutter:
     interface: dbus
     bus: session
-    name: org.bar.audiobookshelfly
+    name: org.bar.abs_flutter
 
 apps:
   audiobookshelfly:
-    command: audiobookshelfly
+    command: abs_flutter
     extensions: [gnome]
     plugs:
       - network
     slots:
-      - dbus-super-cool-app
+      - dbus-abs_flutter
 parts:
   audiobookshelfly:
-    source: .
-    plugin: flutter
-    flutter-target: lib/main.dart
-  uet-lms:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart

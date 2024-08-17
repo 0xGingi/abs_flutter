@@ -97,14 +97,61 @@ jobs:
           mv build/app/outputs/flutter-apk/app-release.apk app-release.apk
           mv build/app/outputs/bundle/release/app-release.aab app-release.aab
 
-      - name: Upload APK, AAB, and Web Artifacts
+      - name: Install packages for Linux build
+        run: |
+          sudo apt-get install -y snapd -o Acquire::ForceIPv4=true
+          sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa -o Acquire::ForceIPv4=true
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev -o Acquire::ForceIPv4=true
+          sudo apt-get install -y liblzma-dev libgtk-3-0 libblkid1 liblzma5 -o Acquire::ForceIPv4=true
+
+      - name: Install package requirements for Flutter
+        run: |
+          sudo apt-get install -y libsecret-1-dev libjsoncpp-dev
+
+      - name: Install Flutter dependencies (Linux)
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux
+
+      - name: Move and rename build
+        run: |
+          zip -r linux-build-release.zip build/linux/x64/release/bundle/abs_flutter
+
+      - name: Clean Flutter
+        run: |
+          flutter clean
+
+      - uses: snapcore/action-build@v1
+        id: snapcraft
+
+      - name: move snap
+        run: mv ${{ steps.snapcraft.outputs.snap }} linux-release.snap
+
+      - name: Upload Android
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-build-artifacts
+          name: Android Release
           path: |
             app-release.apk
             app-release.aab
+
+      - name: Upload Web
+        uses: actions/upload-artifact@v4
+        with:
+          name: Web Release
+          path: |
             web-release.zip
+
+      - name: Upload Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux Release
+          path: |
+            linux-build-release.zip
+            linux-release.snap
 
   build-windows:
     runs-on: windows-latest
@@ -149,7 +196,7 @@ jobs:
       - name: Upload Windows Build and MSIX Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-build-artifacts
+          name: Windows Release
           path: |
             windows-Release-${{ env.VERSION }}.zip
             windows-installer-release-${{ env.VERSION }}.msix
@@ -163,17 +210,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Linux Artifacts
+      - name: Download Android Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ubuntu-build-artifacts
-          path: ./linux-artifacts
+          name: Android Release
+          path: ./android-artifacts
+
+      - name: Download Web Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Web Release
+          path: ./web-artifacts
 
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-build-artifacts
+          name: Windows Release
           path: ./windows-artifacts
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux Release
+          path: ./linux-artifacts
 
       - name: Extract version from pubspec.yaml
         id: extract_version
@@ -183,9 +242,11 @@ jobs:
 
       - name: Rename app-release.apk
         run: | 
-          mv linux-artifacts/app-release.apk linux-artifacts/android-release-${{ env.VERSION }}.apk
-          mv linux-artifacts/app-release.aab linux-artifacts/android-release-${{ env.VERSION }}.aab
-          mv linux-artifacts/web-release.zip linux-artifacts/web-release-${{ env.VERSION }}.zip
+          mv android-artifacts/app-release.apk android-artifacts/android-release-${{ env.VERSION }}.apk
+          mv android-artifacts/app-release.aab android-artifacts/android-release-${{ env.VERSION }}.aab
+          mv web-artifacts/web-release.zip web-artifacts/web-release-${{ env.VERSION }}.zip
+          mv linux-artifacts/linux-build-release.zip linux-artifacts/linux-release-${{ env.VERSION }}.zip
+          mv linux-artifacts/linux-release.snap linux-artifacts/linux-snap-release-${{ env.VERSION }}.snap
 
       - name: Create GitHub Release
         id: create_release
@@ -197,11 +258,13 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: |
-            linux-artifacts/android-release-${{ env.VERSION }}.apk
-            linux-artifacts/android-release-${{ env.VERSION }}.aab
-            linux-artifacts/web-release-${{ env.VERSION }}.zip
+            android-artifacts/android-release-${{ env.VERSION }}.apk
+            android-artifacts/android-release-${{ env.VERSION }}.aab
+            web-artifacts/web-release-${{ env.VERSION }}.zip
             windows-artifacts/windows-Release-${{ env.VERSION }}.zip
             windows-artifacts/windows-installer-release-${{ env.VERSION }}.msix
+            linux-artifacts/linux-release-${{ env.VERSION }}.zip
+            linux-artifacts/linux-snap-release-${{ env.VERSION }}.snap
 
   deploy:
     runs-on: ubuntu-latest
