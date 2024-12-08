@@ -232,7 +232,7 @@ jobs:
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
           cp assets/images/logo/logo_blue_big_abs.png AppDir/usr/share/icons/hicolor/256x256/apps/buchable.png
           
-          cat > AppDir/usr/share/applications/buchable.desktop << EOL
+          cat > AppDir/buchable.desktop << EOL
           [Desktop Entry]
           Name=Buchable
           Comment=The unofficial cross-platform app for Audiobookshelf
@@ -242,6 +242,8 @@ jobs:
           Type=Application
           Categories=Entertainment;
           EOL
+          
+          cp AppDir/buchable.desktop AppDir/usr/share/applications/
           
           cat > AppDir/AppRun << EOL
           #!/bin/sh
