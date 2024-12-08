@@ -230,7 +230,9 @@ jobs:
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
           cp assets/images/logo/logo_blue_big_abs.png AppDir/usr/share/icons/hicolor/256x256/apps/buchable.png
+          cp assets/images/logo/logo_blue_big_abs.png AppDir/buchable.png
           
           cat > AppDir/buchable.desktop << EOL
           [Desktop Entry]
