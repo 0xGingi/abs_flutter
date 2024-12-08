@@ -240,7 +240,7 @@ jobs:
           Icon=buchable
           Terminal=false
           Type=Application
-          Categories=Entertainment;
+          Categories=Audio;AudioVideo;Player;
           EOL
           
           cp AppDir/buchable.desktop AppDir/usr/share/applications/
