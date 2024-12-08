@@ -215,16 +215,44 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //;s/+.*//')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Replace VERSION in snapcraft.yaml
+      - name: Download AppImage builder
         run: |
-          sed -i "s/VERSION/${{ env.VERSION }}/g" snap/snapcraft.yaml
+          sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          sudo chmod +x /usr/local/bin/appimagetool
 
-      - uses: snapcore/action-build@v1
-        id: build
-
-      - name: Rename the snap
+      - name: Prepare AppDir
         run: |
-          mv buchable_${{ env.VERSION }}_amd64.snap linux-release.snap
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          cp assets/images/logo/logo_blue_big_abs.png AppDir/usr/share/icons/hicolor/256x256/apps/buchable.png
+          
+          cat > AppDir/usr/share/applications/buchable.desktop << EOL
+          [Desktop Entry]
+          Name=Buchable
+          Comment=The unofficial cross-platform app for Audiobookshelf
+          Exec=abs_flutter
+          Icon=buchable
+          Terminal=false
+          Type=Application
+          Categories=Entertainment;
+          EOL
+          
+          cat > AppDir/AppRun << EOL
+          #!/bin/sh
+          SELF=\$(readlink -f "\$0")
+          HERE=\${SELF%/*}
+          export PATH="\${HERE}/usr/bin:\${PATH}"
+          export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
+          exec "\${HERE}/usr/bin/abs_flutter" "\$@"
+          EOL
+          
+          chmod +x AppDir/AppRun
+
+      - name: Build AppImage
+        run: |
+          ARCH=x86_64 /usr/local/bin/appimagetool AppDir buchable-${{ env.VERSION }}-x86_64.AppImage
 
       - name: Upload Linux build artifacts
         uses: actions/upload-artifact@v4
@@ -232,7 +260,7 @@ jobs:
           name: linux-build-artifacts
           path: |
             linux-release.zip
-            linux-release.snap
+            buchable-${{ env.VERSION }}-x86_64.AppImage
 
   create-release:
     runs-on: ubuntu-latest
@@ -272,7 +300,7 @@ jobs:
           mv linux-artifacts/app-release.aab linux-artifacts/android-release-${{ env.VERSION }}.aab
           mv linux-artifacts/web-release.zip linux-artifacts/web-release-${{ env.VERSION }}.zip
           mv linux-build-artifacts/linux-release.zip linux-build-artifacts/linux-release-${{ env.VERSION }}.zip
-          mv linux-build-artifacts/linux-release.snap linux-build-artifacts/linux-release-${{ env.VERSION }}.snap
+          mv buchable-${{ env.VERSION }}-x86_64.AppImage linux-build-artifacts/buchable-${{ env.VERSION }}-x86_64.AppImage
 
       - name: Create GitHub Release
         id: create_release
@@ -290,7 +318,7 @@ jobs:
             windows-artifacts/windows-Release-${{ env.VERSION }}.zip
             windows-artifacts/windows-installer-release-${{ env.VERSION }}.msix
             linux-build-artifacts/linux-release-${{ env.VERSION }}.zip
-            linux-build-artifacts/linux-release-${{ env.VERSION }}.snap
+            linux-build-artifacts/buchable-${{ env.VERSION }}-x86_64.AppImage
 
   deploy:
     runs-on: ubuntu-latest
