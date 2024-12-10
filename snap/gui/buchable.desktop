@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Buchable
+Comment=The unofficial cross-platform app for Audiobookshelf
+Exec=buchable
+Icon=buchable
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;Player;
+StartupWMClass=buchable
+X-GNOME-UsesNotifications=true
+MimeType=audio/*;video/*;
