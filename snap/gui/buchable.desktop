@@ -2,7 +2,7 @@
 Name=Buchable
 Comment=The unofficial cross-platform app for Audiobookshelf
 Exec=buchable
-Icon=buchable
+Icon=${SNAP}/usr/share/pixmaps/buchable.png
 Terminal=false
 Type=Application
 Categories=Audio;AudioVideo;Player;

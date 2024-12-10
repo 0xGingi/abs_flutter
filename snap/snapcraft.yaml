@@ -20,6 +20,7 @@ apps:
     plugs:
       - network
       - audio-playback
+      - pulseaudio
       - home
       - removable-media
       - desktop
@@ -29,6 +30,8 @@ apps:
       - unity7
       - gsettings
       - mpris
+      - opengl
+      - hardware-observe
     slots:
       - dbus-buchable
     desktop: usr/share/applications/buchable.desktop
@@ -38,6 +41,18 @@ apps:
       MPV_HOME: $SNAP_USER_DATA/.mpv
       LIBMPV_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1
       MEDIA_KIT_OVERRIDE_LIBMPV_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1
+      MEDIA_KIT_VIDEO_OUTPUT: software
+      MEDIA_KIT_AUDIO_OUTPUT: software
+      LD_PRELOAD: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1
+      MEDIA_KIT_LINUX_ENABLE_PRELOAD: "true"
+      PULSE_SERVER: unix:/run/user/$UID/pulse/native
+      PULSE_RUNTIME_PATH: /run/user/$UID/pulse/
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1.109.0:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libmpv.so.1.109.0
 
 slots:
   dbus-buchable:
@@ -68,21 +83,20 @@ parts:
       - libswresample-dev
       - ffmpeg
     stage-packages:
-      - libsecret-1-0
       - libmpv1
       - mpv
+      - libsecret-1-0
       - libayatana-appindicator3-1
       - libgtk-3-0
-      - xdg-user-dirs
-      - libavcodec58
-      - libavformat58
-      - libavutil56
-      - libswresample3
-      - ffmpeg
+      - libpulse0
+      - pulseaudio-utils
     override-prime: |
       craftctl default
       mkdir -p usr/share/applications
       mkdir -p usr/share/icons/hicolor/256x256/apps
+      mkdir -p usr/share/pixmaps
       cp $SNAPCRAFT_PROJECT_DIR/snap/gui/buchable.desktop usr/share/applications/
-      cp $SNAPCRAFT_PROJECT_DIR/snap/gui/buchable.png usr/share/icons/hicolor/256x256/apps/
-      mkdir -p $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
+      cp $SNAPCRAFT_PROJECT_DIR/snap/gui/buchable.png usr/share/icons/hicolor/256x256/apps/buchable.png
+      cp $SNAPCRAFT_PROJECT_DIR/snap/gui/buchable.png usr/share/pixmaps/buchable.png
+      mkdir -p meta/gui
+      cp $SNAPCRAFT_PROJECT_DIR/snap/gui/buchable.png meta/gui/buchable.png
