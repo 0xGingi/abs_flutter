@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.vito.absapp.abs_flutter</id>
+  <name>Buchable</name>
+  <summary>The unofficial cross-platform app for Audiobookshelf</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>
+      Experience audiobooks and podcasts with Buchable, a third-party client for the Audiobookshelf server.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Fast Account Switching for quick access to multiple accounts</li>
+      <li>Advanced Caching to save data and speed up performance</li>
+      <li>Queue Support to organize your listening sessions</li>
+      <li>Tray Icon Control for easy access on your desktop</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">de.vito.absapp.abs_flutter.desktop</launchable>
+  <url type="homepage">https://github.com/Vito0912/abs_flutter</url>
+  <developer_name>Vito0912</developer_name>
+  <releases>
+    <release version="1.7.4" date="2024-03-14"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>
